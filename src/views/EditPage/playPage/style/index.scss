@@ -1,0 +1,72 @@
+.play-page {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  z-index: 11;
+  .full-btn {
+    position: absolute;
+    width: 100%;
+    height: 40px;
+    z-index: 15;
+    .return-btn {
+      float: right;
+      width: 80px;
+      height: 40px;
+      padding-right: 13px;
+      color: #ffffff;
+      font-size: 14px;
+      line-height: 40px;
+      text-align: right;
+      background: url("~assets/editPage/minimize.png") rgba(0,0,0,.5) no-repeat 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  }
+  .play-canvas {
+    // position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    z-index: 1;
+    #play-canvas {
+      background-color: #ffffff;
+    }
+  }
+  .full-btn_left,
+  .full-btn_right{
+    position: absolute;
+    float: left;
+    width: 80px;
+    height: 100%;
+    top: 0;
+    z-index: 10;
+    .left-img,
+    .right-img {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 10;
+    }
+    .left-img{
+      left:30px;
+      background: url("~assets/editPage/goLeft.png") rgba(0,0,0,.4) no-repeat center;
+    }
+    .right-img {
+      right:30px;
+      background: url("~assets/editPage/goRight.png") rgba(0,0,0,.4) no-repeat center;
+    }
+    
+  }
+  .full-btn_right {
+    float: right;
+    right: 0;
+  }
+
+  
+  
+}

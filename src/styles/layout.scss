@@ -1,0 +1,159 @@
+* {
+    -webkit-box-sizing : border-box;
+    -moz-box-sizing    : border-box;
+    box-sizing         : border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  html,body,#app {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0)!important;
+  }
+  
+ li {
+    list-style: none;
+  }
+
+  /* 禁止鼠标选中文本 */
+.noselect {
+    -webkit-touch-callout : none; /* iOS Safari */
+    -webkit-user-select   : none; /* Chrome/Safari/Opera */
+    -khtml-user-select    : none; /* Konqueror */
+    -moz-user-select      : none; /* Firefox */
+    -ms-user-select       : none; /* Internet Explorer/Edge */
+    user-select           : none;
+  }
+
+   /**填充空元素*/
+.empty {
+  display: inline-block;
+  height: 0!important;
+  opacity: 0;
+}
+
+.scroll{
+  overflow-y: auto;
+}
+
+.scroll::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+.scroll::-webkit-scrollbar-track-piece {
+  background-color: #f6f6f6;
+} /* 滚动条的内层滑轨背景颜色 */
+
+.scroll::-webkit-scrollbar-track {
+  background-color: #f6f6f6;
+} /* 滚动条的外层滑轨背景颜色 */
+
+.scroll::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  // background-color: #EBEBEB;
+  background-color: #d5E4de;
+} /* 滚动条的内层滑块颜色 */
+
+.scroll::-webkit-scrollbar-button {
+  // background-color: #fff;
+  display: none;
+} /* 滑轨两头的监听按钮颜色 */
+
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track-piece {
+  background-color: #f6f6f6;
+} /* 滚动条的内层滑轨背景颜色 */
+
+::-webkit-scrollbar-track {
+  background-color: #f6f6f6;
+} /* 滚动条的外层滑轨背景颜色 */
+
+::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  // background-color: #EBEBEB;
+  background-color: #d5E4de;
+} /* 滚动条的内层滑块颜色 */
+
+::-webkit-scrollbar-button {
+  // background-color: #fff;
+  display: none;
+} /* 滑轨两头的监听按钮颜色 */
+
+input:-webkit-autofill {
+  background-color: transparent;
+  background-image: none;
+  transition: background-color 50000s ease-in-out 0s; 
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+  
+input[type="number"] {
+    -moz-appearance: textfield;
+    border: none;
+    outline:none;
+}  
+input[placeholder] {
+  color: #333333;
+}
+button {
+  outline: none;
+  border: none;
+  font-size: 12px;
+}
+
+.toast-box {
+  position: absolute;
+  width: 350px;
+  height: 50px;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.toast-box-icon:before {
+  position: absolute;
+  margin-top: 17px;
+  margin-left: 20px;
+  width: 16px;
+  height: 16px;
+
+  display: inline-block;
+  content: "";
+}
+.toast-box .el-message__content {
+  line-height: 50px;
+  font-size: 16px;
+  text-align: center;
+  /*color: #fff;*/
+}
+.success-toast {
+  // background-color: #7dc554;
+  background-color: #96dbbf;
+}
+.success-toast .el-message__content {
+  color: #ffffff;
+}
+
+.success-toast-icon:before {
+  /* background-image: url("../../static/images/login/toast-success.png"); */
+}
+
+.error-toast {
+  background-color: #fef0f0;
+}
+.error-toast .el-message__content {
+  color: #f56d6d;
+}
+
+.error-toast-icon:before {
+  /* background-image: url("../../static/images/login/toast-error.png"); */
+}
+
