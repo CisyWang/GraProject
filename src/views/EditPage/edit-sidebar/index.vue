@@ -183,7 +183,9 @@ export default {
       let isEditMode = this.loginInfo.isEditMode;
       // 点击编辑进入
       if (isEditMode) {
+        console.log("edit");
         this.imgId = "";
+        console.log(this.canvasInfo.thumList);
         this.countList = this.canvasInfo.thumList;
       } else {
         // 新建进入

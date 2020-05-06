@@ -4,7 +4,7 @@
     <div class="new-work-page">
       <div class="new-header">
         <div class="header-text noselect">
-          {{ this.loginInfo.nickname }}
+          {{ this.loginInfo.currentUser }}
           <span v-show="this.loginInfo.role == 1">的幻灯片</span>
           <span v-show="this.loginInfo.role == 0">的模板</span>
         </div>
@@ -22,7 +22,7 @@
           <el-table-column fixed="right" label="操作" width="120">
             <template slot-scope="scope">
               <el-button
-                @click.native.prevent="deleteRow(scope.$index)"
+                @click.native.prevent="deleteRow(scope.row)"
                 type="text"
                 size="small"
               >
@@ -62,7 +62,7 @@
 
 <script>
 import NewworkDialog from "@/components/newwork-dialog";
-import { getAllPPTs, getPPTbyName } from "../../service/ppt";
+import { getAllPPTs, getPPTbyName,deletePPTInfo } from "../../service/ppt";
 import { mapState } from "vuex";
 import qs from "qs";
 import axios from "axios";
@@ -95,9 +95,8 @@ export default {
         userid: this.loginInfo.userId
       })
         .then(res => {
-          console.log(res);
-          for (var item in res.data.data) {
-            this.pptNameArr.push(item);
+          for (var item in res.data) {
+            this.pptNameArr.push(res.data[item]);
           }
           _this.getTableData();
           _this.isLoading = false;
@@ -112,9 +111,12 @@ export default {
       this.tableData = [];
       this.pptNameArr.forEach(item => {
         let data = {};
-        data.name = item;
+        data.name = item.name;
+        data.id = item.id
         this.tableData.push(data);
       });
+      console.log("tableData",this.tableData)
+      
     },
 
     /**打开幻灯片进入编辑页面 */
@@ -129,6 +131,7 @@ export default {
       })
         .then(res => {
           let data = JSON.parse(res.data.data);
+          console.log(data)
           _this.canvasInfo.thumList = data.countList;
           _this.canvasInfo.canvasArr = data.canvasArr;
           _this.canvasInfo.canvasThum = data.canvasThum;
@@ -143,16 +146,21 @@ export default {
     },
 
     /**删除幻灯片 */
-    deleteRow(pptIdx) {
+    deleteRow(row) {
+      console.log(row)
       var _this = this;
-      axios
-        .post(
-          "http://www.insozhao.cn/api/ppt/deletePPTInfo",
-          qs.stringify({
+      // axios
+      //   .post(
+      //     "http://localhost:8888/api/ppt/deletePPTInfo",
+      //     qs.stringify({
+      //       userid: this.loginInfo.userId,
+      //       pptid:row.id
+      //     })
+      //   )
+        deletePPTInfo({
             userid: this.loginInfo.userId,
-            pptname: this.tableData[pptIdx].name
+            pptid:row.id
           })
-        )
         .then(
           result => {
             console.log(result);
@@ -178,12 +186,23 @@ export default {
 
     /**确认新建幻灯片 */
     sureAdd(defaultName) {
-      this.loginInfo.isEditMode = false;
-      this.defaultName = defaultName;
-      this.$router.push({
-        name: "editPage",
-        params: { pptName: this.defaultName }
-      });
+      var _this = this;
+      var ifEnable = true;
+      this.pptNameArr.forEach(item => {
+        if (item.name === defaultName) {
+          ifEnable = false;
+        }
+      })
+      if (ifEnable) {
+        this.loginInfo.isEditMode = false;
+        this.defaultName = defaultName;
+        this.$router.push({
+          name: "editPage",
+          params: { pptName: this.defaultName }
+        });
+      } else {
+         _this.$utils.tipBox("幻灯片名称重复", "error");
+      }
     }
   }
 };

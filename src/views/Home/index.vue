@@ -1,22 +1,33 @@
 <template>
   <el-container class="home-container">
     <choose-tags
-      v-show="isShowTags && this.loginInfo.role == 1"
+      v-show="isShowTags && loginInfo.role == 1 && loginInfo.firstLogin"
       @finishChoose="finishChoose"
     ></choose-tags>
     <el-header>
       <div class="container-header" :class="{ start: isScroll }">
         <!-- <div class="logo-pic">logo</div> -->
-        <div class="header-login" @click="loginWork">
-          <span class="login-text">登录</span>
+        <div v-if="!loginInfo.isLogin">
+          <div class="header-login" @click="loginWork">
+            <span class="login-text">登录</span>
+          </div>
+          <div class="header-register" @click="registerWork">
+            <span class="register-text">注册</span>
+          </div>
         </div>
-        <div class="header-register" @click="registerWork">
-          <span class="register-text">注册</span>
-        </div>
-        <div class="header-avator" @click="editWork">
+        <div class="header-avator" @click="loginOut">
           <img :src="defaultAvator" />
         </div>
-        <div class="header-username">{{ this.loginInfo.nickname }}</div>
+        <div
+          v-show="isLogin && isShowLoginOut"
+          class="login-out"
+          @click="loginoutConfirm"
+        >
+          退出登录
+        </div>
+        <div class="header-username">
+          {{ this.$store.state.loginInfo.currentUser }}
+        </div>
       </div>
     </el-header>
     <el-main>
@@ -72,22 +83,28 @@
           <!-- 模板推荐内容 -->
           <div
             class="module-item"
-            v-for="(item, index) in dataList"
+            v-for="(item, index) in imgArr"
             :key="index"
             @mouseenter="mouseenter(index)"
             @mouseleave="mouseleave"
           >
-            <img class="module-img" :src="dataList[index]"/>
+            <img class="module-img" :src="imgArr[index]" />
             <div class="module-tools" v-show="currentModule == index">
               <div class="module-btns">
-                <div class="play-btn" @click="playModule">预览</div>
-                <div class="use-btn" @click="useModule">使用</div>
+                <!-- <div class="play-btn" @click="playModule">预览</div> -->
+                <div class="use-btn" @click="useModule(index)">使用看看</div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="container-footer"></div>
+      <div class="container-footer">
+        <div class="qr-code"></div>
+        <div class="foot-text noselect">
+          <span class="call-us">联系我们</span>
+          <span class="address">地址: 安徽省滁州市南谯区丰乐大道1528号</span>
+        </div>
+      </div>
 
       <!-- 演示 -->
       <play-page v-show="isShowPlay" ref="playPage"></play-page>
@@ -99,8 +116,10 @@
 import { mapState } from "vuex";
 import chooseTags from "@/components/choose-tags";
 import playPage from "@/views/EditPage/playPage/index";
+import { getModules } from "@/service/ppt";
 export default {
   name: "home",
+  inject: ["reload"],
   components: {
     chooseTags,
     playPage
@@ -108,9 +127,6 @@ export default {
   data() {
     return {
       dataList: [
-        require("../../assets/editPage/swiper-edit.png"),
-        require("../../assets/editPage/swiper-repeat.png"),
-        require("../../assets/editPage/swiper-new.png"),
         require("../../assets/editPage/swiper-edit.png"),
         require("../../assets/editPage/swiper-repeat.png"),
         require("../../assets/editPage/swiper-new.png")
@@ -122,11 +138,14 @@ export default {
       isShowTags: true,
       isShowBtns: false,
       currentModule: -1,
-      isShowPlay: false
+      isShowPlay: false,
+      isShowLoginOut: false,
+      imgArr: [], // 模板封面
+      moduleData:"" // 模板数据
     }
   },
   computed: {
-    ...mapState(["loginInfo"]),
+    ...mapState(["loginInfo", "canvasInfo"]),
     //上一张
     prevIndex() {
       if (this.currentIndex == 0) {
@@ -142,6 +161,20 @@ export default {
       } else {
         return this.currentIndex + 1;
       }
+    },
+    isLogin() {
+      if (
+        sessionStorage.getItem("username") &&
+        sessionStorage.getItem("token")
+      ) {
+        var username = sessionStorage.getItem("username");
+        var userid = sessionStorage.getItem("userid");
+        var role = sessionStorage.getItem("role");
+        this.$store.commit("userStatus", { username, userid, role });
+      } else {
+        this.$store.commit("userStatus", null);
+      }
+      return this.$store.getters.isLogin;
     }
   },
   watch: {
@@ -155,6 +188,7 @@ export default {
     window.addEventListener("scroll", this.handleScroll);
     this.runInv();
     this.stopScroll();
+    this.getModules();
   },
   methods: {
     /**标签弹窗出现去除页面滚动条 */
@@ -162,7 +196,11 @@ export default {
       var mo = function(e) {
         e.preventDefault();
       };
-      if (this.isShowTags && this.loginInfo.role == 1) {
+      if (
+        this.isShowTags &&
+        this.loginInfo.role == 1 &&
+        this.loginInfo.firstLogin
+      ) {
         document.body.style.overflow = "hidden";
         document.addEventListener("touchmove", mo, false); //禁止页面滑动
       } else {
@@ -172,6 +210,9 @@ export default {
     },
     finishChoose() {
       this.isShowTags = false;
+      if (this.loginInfo.firstLogin == true) {
+        this.getModules();
+      }
     },
     // 点击登录按钮，跳转到登录页面
     loginWork() {
@@ -228,16 +269,69 @@ export default {
       this.currentModule = -1;
     },
 
+    loginOut() {
+      this.isShowLoginOut = !this.isShowLoginOut;
+    },
+
+    loginoutConfirm() {
+      this.$store.commit("userStatus", null);
+      this.reload();
+    },
+
+    /**获取 PPT 模板 */
+    getModules() {
+      getModules({ userid: this.loginInfo.userId })
+        .then(res => {
+          console.log("success");
+          this.moduleData = res;
+          this.getPostImg();
+        })
+        .catch( err => {
+          console.log("fail");
+          console.log(err);
+        });
+    },
+
+    /**处理模板数据，获取模板封面图片 */
+    getPostImg() {
+      let data = this.moduleData.data;
+      let imgAll = [];
+      data.forEach(item => {
+        imgAll.push(JSON.parse(item.data).canvasThum);
+        console.log(imgAll);
+      });
+      imgAll.forEach(item => {
+        this.imgArr.push(item[0].img);
+      });
+    },
+
     /**预览模板 */
-    playModule(){
+    playModule() {
       this.isShowPlay = true;
       this.$refs.playPage.renderPlayCanvas();
-
     },
 
     /**使用模板 */
-    useModule() {
-
+    useModule(idx) {
+      let data = this.moduleData.data;
+      let moduleArr = [];
+      let moduleThum = [];
+      let moduleSide = [];
+      let pptname;
+      this.loginInfo.isEditMode = true;
+      data.forEach(item => {
+        moduleArr.push(JSON.parse(item.data).canvasArr);
+        moduleThum.push(JSON.parse(item.data).canvasThum);
+        moduleSide.push(JSON.parse(item.data).countList);
+      });
+      this.canvasInfo.canvasArr = moduleArr[idx];
+      this.canvasInfo.canvasThum = moduleThum[idx];
+      this.canvasInfo.thumList = moduleSide[idx];
+      pptname = data[idx].name;
+      this.$router.push({
+        name: "editPage",
+        params: { pptName: pptname }
+      });
     }
   }
 };

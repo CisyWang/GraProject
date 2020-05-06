@@ -24,6 +24,7 @@
 <script>
 import { savePPT } from "../../../service/ppt";
 import { mapState } from "vuex";
+import { Loading } from 'element-ui';
 export default {
   name: "edit-header",
   props: ["pptName"],
@@ -33,7 +34,8 @@ export default {
       undoStep: 0, // 撤销操作
       clearCount: 0,
       clearObj: 0,
-      showTagDialog: false
+      showTagDialog: false,
+      loadingInstance:null
     }
   },
   computed: {
@@ -59,7 +61,7 @@ export default {
     },
 
     /**获取保存 canvas 的所有信息 */
-    getSaveInfo() {
+    getSaveInfo(pptTags) {
       let saveInfo = {},
         userId = this.loginInfo.userId,
         pptInfo = [],
@@ -76,6 +78,9 @@ export default {
 
       saveInfo.userid = userId;
       saveInfo.pptinfo = pptInfo;
+      if (pptTags != null) {
+        saveInfo.tags = pptTags;
+      }
 
       let params = saveInfo;
       this.savePPTs(params);
@@ -84,12 +89,27 @@ export default {
     /**保存幻灯片 */
     savePPTs(params) {
       var _this = this;
+      var options = {
+        lock: true,
+        customClass: "create-isLoading",
+        text: "正在保存",
+        spinner: "el-icon-loading",
+        background: "rgba(255, 255, 255, 0.7)"
+      };
+      _this.loadingInstance = Loading.service(options);
+
       savePPT(params)
         .then(res => {
           console.log("保存成功", res);
-          if (res.data.code == 0) {
+          if (res.data.code == "200") {
+            _this.$nextTick(() => { // 以服务的方式调用的 Loading 需要异步关闭
+              _this.loadingInstance.close();
+            });
             _this.$utils.tipBox(res.data.message, "success");
           } else {
+            _this.$nextTick(() => { // 以服务的方式调用的 Loading 需要异步关闭
+              _this.loadingInstance.close();
+            });
             _this.$utils.tipBox(res.data.message, "error");
           }
         })
@@ -135,5 +155,13 @@ export default {
   height: 30px;
   line-height: 30px;
   padding: 10px;
+}
+.create-isLoading {
+  .el-loading-text {
+    color: #0ab087;
+  }
+  i {
+    color: #0ab087;
+  }
 }
 </style>

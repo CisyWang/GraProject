@@ -83,7 +83,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(["loginInfo"])
+    ...mapState(["loginInfo"]),
   },
   created() {
     this.getVercode();
@@ -155,21 +155,36 @@ export default {
         username: this.telephone,
         password: this.password,
         vercode: this.loginCode,
+        role: this.role,
         uuid: this.uuid
       })
         .then(res => {
-          console.log(res.data.data.username);
-          _this.$utils.tipBox("登录成功！", "success");
-          _this.loginInfo.userId = this.telephone;
-          _this.loginInfo.isLogin = true;
-          _this.loginInfo.nickname = res.data.data.username;
-          setTimeout(() => {
-            _this.$router.push({ name: "home" });
-          }, 1000);
+          if (res.data.code !== "200") {
+            _this.$utils.tipBox(res.data.message, "error");
+            _this.getVercode();
+          } else {
+            _this.$utils.tipBox("登录成功！", "success");
+            _this.loginInfo.userId = this.telephone;
+            _this.loginInfo.isLogin = true;
+            // _this.loginInfo.nickname = res.data.data.userinfo.username;
+            _this.loginInfo.firstLogin = res.data.data.firstLogin;
+            sessionStorage.setItem("token", res.data.data.token);
+            sessionStorage.setItem("username", res.data.data.userinfo.username);
+            sessionStorage.setItem("userid", res.data.data.userinfo.userid);
+            sessionStorage.setItem("isLogin", true);
+            sessionStorage.setItem("role", this.role);
+            _this.$store.dispatch("setUser", {
+              username: res.data.data.userinfo.username,
+              userid: res.data.data.userinfo.userid,
+              role: this.role
+            });
+            setTimeout(() => {
+              _this.$router.push({ name: "home" });
+            }, 1000);
+          }
         })
         .catch(res => {
           console.log("fail", res);
-          _this.getVercode();
           _this.$utils.tipBox("登录失败，请检查用户名和密码！", "error");
         });
     }

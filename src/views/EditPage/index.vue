@@ -118,9 +118,9 @@ export default {
     },
 
     /**管理员选择标签完成，开始保存模板 */
-    finishChoose() {
-      this.isShowTags = false;
-      this.$refs.editHeader.getSaveInfo();
+    finishChoose(pptTags) { 
+        this.isShowTags = false;
+        this.$refs.editHeader.getSaveInfo(pptTags);
     }
   }
 };

@@ -13,10 +13,12 @@ export const state = {
   },
   loginInfo: {
     userId: "", // 用户id
+    currentUser: "1",
     isLogin: false,
+    firstLogin: false,
     nickname: "",
     isEditMode: false,
-    role: 0  // 用户角色
+    role: -1  // 用户角色
   },
   getInfo: {
     countList: [],

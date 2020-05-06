@@ -3,7 +3,7 @@
  <div class="choose-tags">
    <div class="choose-tags-container">
       <div class="tags-header">
-        <span class="nickname">小王</span>
+        <span class="nickname">{{loginInfo.nickname}}</span>
         <span>，欢迎您的登录</span>
       </div>
       <div class="tags-content">
@@ -20,7 +20,7 @@
                 :key="index"
                 @click="addOrRemoveTag(item.id, index)"
               >
-                {{ item.tag }}
+                {{ item.name }}
               </div>
               <div class="tag empty"></div>
               <div class="tag empty"></div>
@@ -33,7 +33,7 @@
             <p>我选择的标签：</p>
             <div class="my-tags">
               <div class="tag tag-color noselect" v-for="(item, id) in myTags" :key="id">
-                {{ item.tag }}
+                {{ item.name }}
               </div>
               <div class="tag empty"></div>
               <div class="tag empty"></div>
@@ -59,6 +59,7 @@
 
 <script>
 import { mapState } from "vuex";
+import {getAllTags,saveMyTags} from '../../service/ppt'
  
 export default {
   computed: {
@@ -67,42 +68,35 @@ export default {
   data() {
     return {
       isSelected: false,
-      allTags: [
-        { id: 0, tag: "配色" },
-        { id: 1, tag: "插图" },
-        { id: 2, tag: "简洁" },
-        { id: 3, tag: "小清新" },
-        { id: 4, tag: "中国风" },
-        { id: 5, tag: "公开演讲" },
-        { id: 6, tag: "年终总结" },
-        { id: 7, tag: "简历竞聘" },
-        { id: 8, tag: "节假节日" },
-        { id: 9, tag: "毕业答辩" },
-        { id: 10, tag: "创意" },
-        { id: 11, tag: "其他" },
-        { id: 12, tag: "公开演讲" },
-        { id: 13, tag: "年终总结" },
-        { id: 14, tag: "简历竞聘" },
-        { id: 15, tag: "节假节日" },
-        { id: 16, tag: "毕业答辩" },
-        { id: 17, tag: "创意" },
-        { id: 18, tag: "其他" },
-        { id: 19, tag: "公开演讲" },
-        { id: 20, tag: "年终总结" },
-        { id: 21, tag: "简历竞聘" },
-        { id: 22, tag: "节假节日" },
-        { id: 23, tag: "毕业答辩" },
-        { id: 24, tag: "创意" },
-        { id: 25, tag: "其他" },
-      ],
+      allTags: null,
       myTags: [],
-      isAdd:[]
+      isAdd:[],
+      pptTag:null
     }
   },
   methods: {
     /**完成标签选择 */
     finishChoose() {
-      this.$emit("finishChoose");
+     
+      var tagIds = ''
+      for (let i = 0; i < this.myTags.length; i++) {
+        tagIds+=this.myTags[i].id+','
+      }
+      tagIds =  tagIds.slice(0,tagIds.length-1)
+
+      if(this.loginInfo.role==='1'){
+          saveMyTags({
+          tagIds:tagIds
+        }).then(res=>{
+          console.log(res)
+        })
+        this.$emit("finishChoose");
+      }else {
+        this.pptTag = tagIds;
+        console.log("管理员操作")
+        this.$emit("finishChoose",this.pptTag);
+      }
+      
     },
 
     /**判断添加或者移除标签 */
@@ -147,6 +141,11 @@ export default {
         }
       }
     },
+  },
+  created(){
+   getAllTags().then(res=>{
+     this.allTags = res.data.data
+   })
   }
 }
 </script>

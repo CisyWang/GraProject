@@ -44,6 +44,7 @@ service.interceptors.request.use(
 
 // 通用方法
 let base = "http://www.insozhao.cn/";
+// let base = "http://localhost:8888/";
 
 export const GET = (url, params) => {
   return axios.get(`${base}${url}`, {
@@ -58,7 +59,8 @@ export const POST = (url, params) => {
     method: "post",
     data: params,
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Authorization":sessionStorage.getItem("token")
     }
   });
 }
